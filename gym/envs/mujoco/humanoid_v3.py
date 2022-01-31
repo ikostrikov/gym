@@ -3,14 +3,6 @@ from gym.envs.mujoco import mujoco_env
 from gym import utils
 
 
-DEFAULT_CAMERA_CONFIG = {
-    "trackbodyid": 1,
-    "distance": 4.0,
-    "lookat": np.array((0.0, 0.0, 2.0)),
-    "elevation": -20.0,
-}
-
-
 def mass_center(model, sim):
     mass = np.expand_dims(model.body_mass, axis=1)
     xpos = sim.data.xipos
@@ -81,8 +73,8 @@ class HumanoidEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return done
 
     def _get_obs(self):
-        position = self.sim.data.qpos.flat.copy()
-        velocity = self.sim.data.qvel.flat.copy()
+        position = self.sim.position().flat.copy()
+        velocity = self.sim.velocity().flat.copy()
 
         com_inertia = self.sim.data.cinert.flat.copy()
         com_velocity = self.sim.data.cvel.flat.copy()
@@ -155,8 +147,6 @@ class HumanoidEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return observation
 
     def viewer_setup(self):
-        for key, value in DEFAULT_CAMERA_CONFIG.items():
-            if isinstance(value, np.ndarray):
-                getattr(self.viewer.cam, key)[:] = value
-            else:
-                setattr(self.viewer.cam, key, value)
+        self.viewer.set_free_camera_settings(trackbodyid=1, distance=4.0,
+                                             lookat=np.array((0.0, 0.0, 2.0)),
+                                             elevation=-20.0)

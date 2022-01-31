@@ -27,9 +27,7 @@ class InvertedPendulumEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return self._get_obs()
 
     def _get_obs(self):
-        return np.concatenate([self.sim.data.qpos, self.sim.data.qvel]).ravel()
+        return np.concatenate([self.sim.position(), self.sim.velocity()]).ravel()
 
     def viewer_setup(self):
-        v = self.viewer
-        v.cam.trackbodyid = 0
-        v.cam.distance = self.model.stat.extent
+        self.viewer.set_free_camera_settings(trackbodyid=0, distance=self.model.stat.extent) 

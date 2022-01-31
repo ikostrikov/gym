@@ -53,7 +53,7 @@ class HopperEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
     @property
     def is_healthy(self):
-        z, angle = self.sim.data.qpos[1:3]
+        z, angle = self.sim.position()[1:3]
         state = self.state_vector()[2:]
 
         min_state, max_state = self._healthy_state_range
@@ -74,8 +74,8 @@ class HopperEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return done
 
     def _get_obs(self):
-        position = self.sim.data.qpos.flat.copy()
-        velocity = np.clip(self.sim.data.qvel.flat.copy(), -10, 10)
+        position = self.sim.position().flat.copy()
+        velocity = np.clip(self.sim.velocity().flat.copy(), -10, 10)
 
         if self._exclude_current_positions_from_observation:
             position = position[1:]
@@ -84,9 +84,9 @@ class HopperEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return observation
 
     def step(self, action):
-        x_position_before = self.sim.data.qpos[0]
+        x_position_before = self.sim.position()[0]
         self.do_simulation(action, self.frame_skip)
-        x_position_after = self.sim.data.qpos[0]
+        x_position_after = self.sim.position()[0]
         x_velocity = (x_position_after - x_position_before) / self.dt
 
         ctrl_cost = self.control_cost(action)

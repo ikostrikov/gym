@@ -12,8 +12,8 @@ class HumanoidStandupEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         data = self.sim.data
         return np.concatenate(
             [
-                data.qpos.flat[2:],
-                data.qvel.flat,
+                self.sim.position().flat[2:],
+                self.sim.velocity().flat,
                 data.cinert.flat,
                 data.cvel.flat,
                 data.qfrc_actuator.flat,
@@ -23,7 +23,7 @@ class HumanoidStandupEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def step(self, a):
         self.do_simulation(a, self.frame_skip)
-        pos_after = self.sim.data.qpos[2]
+        pos_after = self.sim.position()[2]
         data = self.sim.data
         uph_cost = (pos_after - 0) / self.model.opt.timestep
 
@@ -58,7 +58,6 @@ class HumanoidStandupEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return self._get_obs()
 
     def viewer_setup(self):
-        self.viewer.cam.trackbodyid = 1
-        self.viewer.cam.distance = self.model.stat.extent * 1.0
-        self.viewer.cam.lookat[2] = 0.8925
-        self.viewer.cam.elevation = -20
+        self.viewer.set_free_camera_settings(trackbodyid=1, distance=self.model.stat.extent * 1.0,
+                                             lookat=np.array((0.0, 0.0, 0.8925)),
+                                             elevation=-20.0)

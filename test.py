@@ -1,7 +1,7 @@
 import gym
 
 
-env = gym.make("Ant-v3")
+env = gym.make("Reacher-v2")
 
 episodes = 250
 

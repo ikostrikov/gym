@@ -6,7 +6,7 @@ from gym.envs.mujoco import mujoco_env
 class ReacherEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         utils.EzPickle.__init__(self)
-        mujoco_env.MujocoEnv.__init__(self, "richer.xml", 2)
+        mujoco_env.MujocoEnv.__init__(self, "reacher.xml", 2)
 
     def step(self, a):
         vec = self.get_body_com("fingertip") - self.get_body_com("target")
@@ -19,7 +19,7 @@ class ReacherEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return ob, reward, done, dict(reward_dist=reward_dist, reward_ctrl=reward_ctrl)
 
     def viewer_setup(self):
-        self.viewer.cam.trackbodyid = 0
+        self.viewer.set_free_camera_settings(trackbodyid=0)
 
     def reset_model(self):
         qpos = (
@@ -39,13 +39,13 @@ class ReacherEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return self._get_obs()
 
     def _get_obs(self):
-        theta = self.sim.data.qpos.flat[:2]
+        theta = self.sim.position().flat[:2]
         return np.concatenate(
             [
                 np.cos(theta),
                 np.sin(theta),
-                self.sim.data.qpos.flat[2:],
-                self.sim.data.qvel.flat[:2],
+                self.sim.position().flat[2:],
+                self.sim.velocity().flat[:2],
                 self.get_body_com("fingertip") - self.get_body_com("target"),
             ]
         )
