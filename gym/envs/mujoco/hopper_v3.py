@@ -5,14 +5,6 @@ from gym.envs.mujoco import mujoco_env
 from gym import utils
 
 
-DEFAULT_CAMERA_CONFIG = {
-    "trackbodyid": 2,
-    "distance": 3.0,
-    "lookat": np.array((0.0, 0.0, 1.15)),
-    "elevation": -20.0,
-}
-
-
 class HopperEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(
         self,
@@ -132,8 +124,6 @@ class HopperEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return observation
 
     def viewer_setup(self):
-        for key, value in DEFAULT_CAMERA_CONFIG.items():
-            if isinstance(value, np.ndarray):
-                getattr(self.viewer.cam, key)[:] = value
-            else:
-                setattr(self.viewer.cam, key, value)
+        self.viewer.set_free_camera_settings(trackbodyid=2, distance=3.0,
+                                             lookat=np.array((0.0, 0.0, 1.5)),
+                                             elevation=-20.0)

@@ -4,6 +4,7 @@ from typing import Optional
 
 from gym import error, spaces
 from gym.utils import seeding
+from gym.envs.mujoco.viewer import WindowViewer
 import numpy as np
 from os import path
 import gym
@@ -55,7 +56,6 @@ class MujocoEnv(gym.Env):
         self.model = self.sim.model
         self.data = self.sim.data
         self.viewer = None
-        self._viewers = {}
 
         self.metadata = {
             "render.modes": ["human", "rgb_array", "depth_array"],
@@ -137,20 +137,42 @@ class MujocoEnv(gym.Env):
         camera_id=None,
         camera_name=None,
     ):
+        if mode == "rgb_array" or mode == "depth_array":
+            if camera_id is not None and camera_name is not None:
+                raise ValueError(
+                    "Both `camera_id` and `camera_name` cannot be"
+                    " specified at the same time."
+                )
+
+            no_camera_specified = camera_name is None and camera_id is None
+            if no_camera_specified:
+                camera_name = "track"
+
+            if camera_id is None and camera_name in self.model._camera_name2id:
+                camera_id = self.model.name2id(camera_name, "camera")
+
+            self._get_viewer(mode).render(width, height, camera_id=camera_id)
+
         if mode == "rgb_array":
             camera_id = camera_id or 0
             return self.sim.render(height, width, camera_id)
+        elif mode == "depth_array":
+            return self.sim.render(height, width, camera_id, depth=True)
+        elif mode == "human":
+            if self.viewer is None:
+                self.viewer = WindowViewer(self.sim)
+                self.viewer_setup()
+            self.viewer.render_to_window()
         else:
             raise NotImplemented
 
     def close(self):
         if self.viewer is not None:
-            # self.viewer.finish()
+            self.viewer.close()
             self.viewer = None
-            self._viewers = {}
 
     def get_body_com(self, body_name):
         return self.sim.named.data.xpos[body_name]
 
     def state_vector(self):
-        return np.concatenate([self.sim.data.qpos.flat, self.sim.data.qvel.flat])
+        return np.concatenate([self.sim.position().flat, self.sim.velocity().flat])

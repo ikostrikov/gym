@@ -3,11 +3,6 @@ from gym import utils
 from gym.envs.mujoco import mujoco_env
 
 
-DEFAULT_CAMERA_CONFIG = {
-    "distance": 4.0,
-}
-
-
 class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(
         self,
@@ -113,8 +108,8 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return observation, reward, done, info
 
     def _get_obs(self):
-        position = self.sim.data.qpos.flat.copy()
-        velocity = self.sim.data.qvel.flat.copy()
+        position = self.sim.position().flat.copy()
+        velocity = self.sim.velocity().flat.copy()
         contact_force = self.contact_forces.flat.copy()
 
         if self._exclude_current_positions_from_observation:
@@ -142,8 +137,4 @@ class AntEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return observation
 
     def viewer_setup(self):
-        for key, value in DEFAULT_CAMERA_CONFIG.items():
-            if isinstance(value, np.ndarray):
-                getattr(self.viewer.cam, key)[:] = value
-            else:
-                setattr(self.viewer.cam, key, value)
+        self.viewer.set_free_camera_settings(distance=4.0)

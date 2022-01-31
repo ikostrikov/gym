@@ -17,12 +17,13 @@ DEFAULT_WINDOW_TITLE = 'MuJoCo Viewer'
 # Internal renderbuffer size, in pixels.
 _MAX_RENDERBUFFER_SIZE = 2048
 
-class Viewere:
+class WindowViewer:
     """Renders DM Control Physics objects."""
 
     def __init__(self, sim: dm_mujoco.Physics):
-        super().__init__(sim)
         self._window = None
+        self._sim = sim
+        self.set_free_camera_settings()
 
     def render_to_window(self):
         """Renders the Physics object to a window.
@@ -50,6 +51,7 @@ class Viewere:
     
     def set_free_camera_settings(
             self,
+            trackbodyid = None,
             distance = None,
             azimuth = None,
             elevation = None,
@@ -66,6 +68,8 @@ class Viewere:
                 median position of the simulation geometry.
         """
         settings = {}
+        if trackbodyid is not None:
+            settings['trackbodyid'] = trackbodyid
         if distance is not None:
             settings['distance'] = distance
         if azimuth is not None:
@@ -102,9 +106,9 @@ class DMRenderWindow:
     """Class that encapsulates a graphical window."""
 
     def __init__(self,
-                 width: int = DEFAULT_WINDOW_WIDTH,
-                 height: int = DEFAULT_WINDOW_HEIGHT,
-                 title: str = DEFAULT_WINDOW_TITLE):
+                 width = DEFAULT_WINDOW_WIDTH,
+                 height = DEFAULT_WINDOW_HEIGHT,
+                 title = DEFAULT_WINDOW_TITLE):
         """Creates a graphical render window.
         Args:
             width: The width of the window.
