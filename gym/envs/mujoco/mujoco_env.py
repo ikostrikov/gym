@@ -18,7 +18,7 @@ except ImportError as e:
         )
     )
 
-DEFAULT_SIZE = 500
+DEFAULT_SIZE = 480
 
 
 def convert_observation_to_space(observation):
@@ -131,7 +131,7 @@ class MujocoEnv(gym.Env):
 
     def render(
         self,
-        mode="human",
+        mode="rgb_array",
         width=DEFAULT_SIZE,
         height=DEFAULT_SIZE,
         camera_id=None,
@@ -147,20 +147,18 @@ class MujocoEnv(gym.Env):
             no_camera_specified = camera_name is None and camera_id is None
             if no_camera_specified:
                 camera_name = "track"
-
-            if camera_id is None and camera_name in self.model._camera_name2id:
+            
+            if camera_id is None:
                 camera_id = self.model.name2id(camera_name, "camera")
-
-            self._get_viewer(mode).render(width, height, camera_id=camera_id)
 
         if mode == "rgb_array":
             camera_id = camera_id or 0
             return self.sim.render(height, width, camera_id)
-        elif mode == "depth_array":
-            return self.sim.render(height, width, camera_id, depth=True)
+        # elif mode == "depth_array":
+        #     return self.sim.render(height, width, camera_id, depth=True)
         elif mode == "human":
             if self.viewer is None:
-                self.viewer = WindowViewer(self.sim)
+                self.viewer = WindowViewer(self.sim, height, width)
                 self.viewer_setup()
             self.viewer.render_to_window()
         else:

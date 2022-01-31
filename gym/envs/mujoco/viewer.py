@@ -20,9 +20,11 @@ _MAX_RENDERBUFFER_SIZE = 2048
 class WindowViewer:
     """Renders DM Control Physics objects."""
 
-    def __init__(self, sim: dm_mujoco.Physics):
+    def __init__(self, sim, height=DEFAULT_WINDOW_HEIGHT, width=DEFAULT_WINDOW_WIDTH ):
         self._window = None
         self._sim = sim
+        self.height = height
+        self.width = width
         self.set_free_camera_settings()
 
     def render_to_window(self):
@@ -31,7 +33,7 @@ class WindowViewer:
         This function is a no-op if the window was already created.
         """
         if not self._window:
-            self._window = DMRenderWindow()
+            self._window = DMRenderWindow(self.width, self.height)
             self._window.load_model(self._sim)
             self._update_camera_properties(self._window.camera)
 
@@ -105,10 +107,7 @@ class WindowViewer:
 class DMRenderWindow:
     """Class that encapsulates a graphical window."""
 
-    def __init__(self,
-                 width = DEFAULT_WINDOW_WIDTH,
-                 height = DEFAULT_WINDOW_HEIGHT,
-                 title = DEFAULT_WINDOW_TITLE):
+    def __init__(self, width, height,  title = DEFAULT_WINDOW_TITLE):
         """Creates a graphical render window.
         Args:
             width: The width of the window.
